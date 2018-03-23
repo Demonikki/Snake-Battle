@@ -1,6 +1,8 @@
-# Creating and experimenting with multiple AI's performance using a 2-player Snake Battle.
+# Snake Battle - AI
+## CSE 150 W18 Extra Credit Report
 
-## Credits for the game engine go to user Scriptim's [Snake-Battle](https://github.com/Scriptim/Snake-Battle) Project.
+### Creating and experimenting with multiple AI's performance using a 2-player Snake Battle.
+### Credits for the game engine go to user Scriptim's [Snake-Battle](https://github.com/Scriptim/Snake-Battle) Project.
 
 
 -----
