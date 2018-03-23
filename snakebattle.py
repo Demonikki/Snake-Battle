@@ -5,16 +5,19 @@ from pygame.locals import *
 
 #Run simulations
 auto = True
+draw = False
+
+
+def_fps = 10000000
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('-s', '--tilesize', dest='tilesize', metavar='PX', help='the size of a tile', type=int, default=12)
 arg_parser.add_argument('-t', '--tiles', dest='tiles', nargs=2, metavar=('X', 'Y'), help='the number of tiles', type=int, default=[70, 50])
 arg_parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='show debug information on the screen')
-arg_parser.add_argument('-f', '--fps', dest='fps', nargs=1, metavar='TPS', help='framerate in ticks per second', type=int, default=12)
+arg_parser.add_argument('-f', '--fps', dest='fps', nargs=1, metavar='TPS', help='framerate in ticks per second', type=int, default=def_fps)
 arg_parser.add_argument('-b', '--delay', dest='delay', metavar='MS', help='button delay (raspi mode)', type=int, default=100)
 args = arg_parser.parse_args()
-print(args)
 
 ## center window
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -61,28 +64,16 @@ LEFT = (1, 0)
 
 ## game over
 game_over = False
+winners = []    #1 represents Player 1, 2 represents Player 2, 0 means draw
 
 ## print game over message
 def game_over_msg(winner):
-    if winner == 0:
-        if p1.length == p2.length:
-            draw = FONT_SC.render("Draw!", 1, COLOR_FG)
-            DISPLAY_SURFACE.blit(draw, (DISPLAY_SURFACE.get_width() / 2 - draw.get_rect().width / 2, 200))
-        elif p1.length > p2.length:
-            game_over_msg(1)
-        else:
-            game_over_msg(2)
-    elif winner == 1:
-        p1_wins = FONT_SC.render("Player 1 wins!", 1, COLOR_P1)
-        DISPLAY_SURFACE.blit(p1_wins, (DISPLAY_SURFACE.get_width() / 2 - p1_wins.get_rect().width / 2, 200))
-    elif winner == 2:
-        p2_wins = FONT_SC.render("Player 2 wins!", 1, COLOR_P2)
-        DISPLAY_SURFACE.blit(p2_wins, (DISPLAY_SURFACE.get_width() / 2 - p2_wins.get_rect().width / 2, 200))
+    winners.append(winner)
+    with open("results.txt", "a") as myfile:
+        myfile.write(str(winner))
 
-## food
-food_drawn = False
-food_x = None
-food_y = None
+
+
 
 ## players
 class Player:
@@ -114,20 +105,25 @@ class Player:
             elif self.direction == LEFT:
                 self.direction = UP
 
+game_over = False
 p1 = Player()
-p1.x = 4
-p1.y = TILES_Y / 2 + 5
+p1.x = random.randint(0,TILES_X)
+p1.y = random.randint(0,TILES_Y)
 p1.direction = UP
 # p1.tail = [(p1.x, p1.y - 1), (p1.x, p1.y - 2)]
 
 p2 = Player()
-p2.x = TILES_X - 5
-p2.y = TILES_Y / 2 + 5
+p2.x = random.randint(0,TILES_X)
+p2.y = random.randint(0,TILES_Y)
+while (p2.x == p1.x and p2.y == p1.y):
+    p2.x = random.randint(0,TILES_X)
+    p2.y = random.randint(0,TILES_Y)
 p2.direction = UP
 # p2.tail = [(p2.x, p2.y - 1), (p2.x, p2.y - 2)]
 
 # Create AI objects
 simpleai = Simple_ai(UP, marked_tiles)
+
 
 ## main loop
 while not game_over:
@@ -160,7 +156,6 @@ while not game_over:
     ## run simulation
     if auto:
         move = simpleai.computeMove()
-        print (move)
         if move == 'left': 
             p1.left = True
             p1.right = False
@@ -223,23 +218,6 @@ while not game_over:
                 game_over_msg(1)
                 game_over = True
 
-    ## debugging
-    if DEBUG:
-        DISPLAY_SURFACE.blit(FONT_DB.render("Player 1", 1, COLOR_DB), (10, DISPLAY_SURFACE.get_height() - 80))
-        DISPLAY_SURFACE.blit(FONT_DB.render("Dir: " + str(p1.direction), 1, COLOR_DB), (10, DISPLAY_SURFACE.get_height() - 60))
-        DISPLAY_SURFACE.blit(FONT_DB.render("Length: " + str(p1.length), 1, COLOR_DB), (10, DISPLAY_SURFACE.get_height() - 40))
-
-        DISPLAY_SURFACE.blit(FONT_DB.render("Player 2", 1, COLOR_DB), (180, DISPLAY_SURFACE.get_height() - 80))
-        DISPLAY_SURFACE.blit(FONT_DB.render("Dir: " + str(p2.direction), 1, COLOR_DB), (180, DISPLAY_SURFACE.get_height() - 60))
-        DISPLAY_SURFACE.blit(FONT_DB.render("Length: " + str(p2.length), 1, COLOR_DB), (180, DISPLAY_SURFACE.get_height() - 40))
-
-        DISPLAY_SURFACE.blit(FONT_DB.render("MS: " + str(pygame.time.get_ticks()), 1, COLOR_DB), (340, DISPLAY_SURFACE.get_height() - 80))
-        DISPLAY_SURFACE.blit(FONT_DB.render("FPS: " + str(round(CLOCK.get_fps(), 2)), 1, COLOR_DB), (340, DISPLAY_SURFACE.get_height() - 60))
-        if food_drawn:
-            DISPLAY_SURFACE.blit(FONT_DB.render("Food: (" + str(food_x) + ", " + str(food_y) + ")", 1, COLOR_DB), (340, DISPLAY_SURFACE.get_height() - 40))
-        else:
-            DISPLAY_SURFACE.blit(FONT_DB.render("Food: -", 1, COLOR_DB), (340, DISPLAY_SURFACE.get_height() - 40))
-
     #add head to marked tiles
     marked_tiles[(p1.x, p1.y)] =  COLOR_P1
     marked_tiles[(p2.x, p2.y)] =  COLOR_P2
@@ -248,5 +226,5 @@ while not game_over:
     CLOCK.tick(TPS)
     pygame.display.update()
 
-    
-pygame.time.wait(4000)
+
+pygame.time.wait(40)
