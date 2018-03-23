@@ -8,7 +8,8 @@ auto = True
 draw = False
 
 
-def_fps = 10000000
+
+def_fps = 12 #10000000
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
@@ -110,7 +111,6 @@ p1 = Player()
 p1.x = random.randint(0,TILES_X)
 p1.y = random.randint(0,TILES_Y)
 p1.direction = UP
-# p1.tail = [(p1.x, p1.y - 1), (p1.x, p1.y - 2)]
 
 p2 = Player()
 p2.x = random.randint(0,TILES_X)
@@ -119,10 +119,12 @@ while (p2.x == p1.x and p2.y == p1.y):
     p2.x = random.randint(0,TILES_X)
     p2.y = random.randint(0,TILES_Y)
 p2.direction = UP
-# p2.tail = [(p2.x, p2.y - 1), (p2.x, p2.y - 2)]
 
+
+## Define which AI for which player
 # Create AI objects
-simpleai = Simple_ai(UP, marked_tiles)
+player1_ai = Simple_ai(UP, marked_tiles, (p1.x,p1.y), (p2.x,p2.y))
+player2_ai = Simple_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
 
 
 ## main loop
@@ -155,15 +157,24 @@ while not game_over:
                 p2.turn()
     ## run simulation
     if auto:
-        move = simpleai.computeMove()
-        if move == 'left': 
+        move1 = player1_ai.computeMove()
+        if move1 == 'left': 
             p1.left = True
             p1.right = False
             p1.turn()
-        elif move == 'right':
+        elif move1 == 'right':
             p1.left = False
             p1.right = True
-            p1.turn()       
+            p1.turn() 
+        move2 = player2_ai.computeMove()
+        if move2 == 'left': 
+            p2.left = True
+            p2.right = False
+            p2.turn()
+        elif move2 == 'right':
+            p2.left = False
+            p2.right = True
+            p2.turn()       
 
 
     #Reset turn values
