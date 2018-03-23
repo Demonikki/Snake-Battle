@@ -3,7 +3,6 @@ from pygame.locals import *
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument('-r', '--raspi', dest='raspi', action='store_true', help='run snake battle on a raspberry pi')
 arg_parser.add_argument('-s', '--tilesize', dest='tilesize', metavar='PX', help='the size of a tile', type=int, default=12)
 arg_parser.add_argument('-t', '--tiles', dest='tiles', nargs=2, metavar=('X', 'Y'), help='the number of tiles', type=int, default=[70, 50])
 arg_parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='show debug information on the screen')
@@ -15,31 +14,12 @@ print(args)
 ## center window
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
-## raspberry mode setup
-if args.raspi:
-    from RPi import GPIO
-    print("## Raspberry Mode ##")
-    GPIO.setmode(GPIO.BCM)
-    P1_LEFT_PIN = 25
-    P1_RIGHT_PIN = 24
-    P2_LEFT_PIN = 23
-    P2_RIGHT_PIN = 18
-    GPIO.setup(P1_LEFT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(P1_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(P2_LEFT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(P2_RIGHT_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    ## button delay
-    BTN_DELAY = args.delay
-    p1_left_ms = 0
-    p1_right_ms = 0
-    p2_left_ms = 0
-    p2_right_ms = 0
-
-
 ## window dimensions
 TILE_SIZE = args.tilesize
 TILES_X = args.tiles[0]
 TILES_Y = args.tiles[1]
+
+marked_tiles = {}
 
 ## colors
 COLOR_BG = (30, 30, 30) # background
@@ -59,7 +39,7 @@ def get_dimension(x, y, width = 0, height = 0):
   
 ## init
 pygame.init()
-pygame.display.set_caption('Snake Battle by Scriptim' + (' (Raspberry Mode)' if args.raspi else ''))
+pygame.display.set_caption('Snake Battle AI' )
 CLOCK = pygame.time.Clock()
 DISPLAY_SURFACE = pygame.display.set_mode((TILE_SIZE * TILES_X, TILE_SIZE * TILES_Y))
 DISPLAY_SURFACE.fill(COLOR_BG)
@@ -107,7 +87,7 @@ class Player:
     right = False
     direction = None
     length = 2
-    tail = []
+    # tail = []
 
     def turn(self):
         if self.right:
@@ -133,13 +113,13 @@ p1 = Player()
 p1.x = 4
 p1.y = TILES_Y / 2 + 5
 p1.direction = UP
-p1.tail = [(p1.x, p1.y - 1), (p1.x, p1.y - 2)]
+# p1.tail = [(p1.x, p1.y - 1), (p1.x, p1.y - 2)]
 
 p2 = Player()
 p2.x = TILES_X - 5
 p2.y = TILES_Y / 2 + 5
 p2.direction = UP
-p2.tail = [(p2.x, p2.y - 1), (p2.x, p2.y - 2)]
+# p2.tail = [(p2.x, p2.y - 1), (p2.x, p2.y - 2)]
 
 ## main loop
 while not game_over:
@@ -151,7 +131,7 @@ while not game_over:
             pygame.quit()
             sys.exit()
         ## keyboard mode
-        elif event.type == KEYDOWN and not args.raspi:
+        elif event.type == KEYDOWN :
             if event.key == K_a:
                 p1.left = True
                 p1.right = False
@@ -169,24 +149,7 @@ while not game_over:
                 p2.left = False
                 p2.turn()
                 
-    ## raspberry mode
-    if args.raspi:
-        if not GPIO.input(P1_LEFT_PIN) and pygame.time.get_ticks() - p1_left_ms > BTN_DELAY:
-            p1_left_ms = pygame.time.get_ticks()
-            p1.left = True
-            p1.turn()
-        if not GPIO.input(P1_RIGHT_PIN) and pygame.time.get_ticks() - p1_right_ms > BTN_DELAY:
-            p1_right_ms = pygame.time.get_ticks()
-            p1.right = True
-            p1.turn()
-        if not GPIO.input(P2_LEFT_PIN) and pygame.time.get_ticks() - p2_left_ms > BTN_DELAY:
-            p2_left_ms = pygame.time.get_ticks()
-            p2.left = True
-            p2.turn()
-        if not GPIO.input(P2_RIGHT_PIN) and pygame.time.get_ticks() - p2_right_ms > BTN_DELAY:
-            p2_right_ms = pygame.time.get_ticks()
-            p2.right = True
-            p2.turn()
+
 
     p1.left = False
     p1.right = False
@@ -206,44 +169,12 @@ while not game_over:
     p2.x += p2.direction[0]
     p2.y += p2.direction[1]
     
-    ## draw tail
-    for i in p1.tail:
-        pygame.draw.rect(DISPLAY_SURFACE, COLOR_P1, get_dimension(i[0], i[1], 1, 1))
-    for i in p2.tail:
-        pygame.draw.rect(DISPLAY_SURFACE, COLOR_P2, get_dimension(i[0], i[1], 1, 1))
+    ## draw trail
+    for i, color in marked_tiles.items():
+        pygame.draw.rect(DISPLAY_SURFACE, color, get_dimension(i[0], i[1], 1, 1))
 
-    ## move tail
-    for i in range(p1.length - 1, -1, -1):
-        if i == 0:
-            p1.tail[i] = (p1.x, p1.y)
-        else:
-            p1.tail[i] = (p1.tail[i - 1][0], p1.tail[i - 1][1])
-    for i in range(p2.length - 1, -1, -1):
-        if i == 0:
-            p2.tail[i] = (p2.x, p2.y)
-        else:
-            p2.tail[i] = (p2.tail[i - 1][0], p2.tail[i - 1][1])
-
-    ## food
-    if food_drawn:
-        pygame.draw.rect(DISPLAY_SURFACE, COLOR_FD, get_dimension(food_x, food_y, 1, 1))
-        if p1.x == food_x and p1.y == food_y:
-            p1.tail.insert(0, (p1.x + p1.direction[0], p1.y + p1.direction[1]))
-            p1.x = food_x + p1.direction[0]
-            p1.y = food_y + p1.direction[1]
-            p1.length += 1
-            food_drawn = False
-        elif p2.x == food_x and p2.y == food_y:
-            p2.tail.insert(0, (p2.x + p2.direction[0], p2.y + p2.direction[1]))
-            p2.x = food_x + p2.direction[0]
-            p2.y = food_y + p2.direction[1]
-            p2.length += 1
-            food_drawn = False
-    else:
-        if random.random() > 0.95:
-            food_x = random.choice(range(1, TILES_X - 1))
-            food_y = random.choice(range(1, TILES_Y - 1))
-            food_drawn = True
+    #Increment length every loop
+    p1.length += 1
 
     ## score
     p1_length_label = FONT_SC.render(str(p1.length), 1, COLOR_P1)
@@ -254,29 +185,28 @@ while not game_over:
     DISPLAY_SURFACE.blit(p2_length_label, (DISPLAY_SURFACE.get_width() / 2 + sep_length_label.get_rect().width + TILE_SIZE, 20))
 
     ## check game over (edges)
-    if (p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0) and (p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0):
-        game_over_msg(0)
-        game_over = True
-    else:
-        if p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0:
-            game_over_msg(2)
-            game_over = True
-        elif p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0:
-            game_over_msg(1)
-            game_over = True
+    # if (p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0) and (p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0):
+    #     game_over_msg(0)
+    #     game_over = True
+    # else:
+    #     if p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0:
+    #         game_over_msg(2)
+    #         game_over = True
+    #     elif p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0:
+    #         game_over_msg(1)
+    #         game_over = True
 
     ## check game over (touch)
     if p1.x == p2.x and p1.y == p2.y:
         game_over_msg(0)
         game_over = True
     else:
-        for i in p1.tail:
-            if i[0] == p2.x and i[1] == p2.y:
-                game_over_msg(1)
-                game_over = True
-        for i in p2.tail:
+        for (i,c) in marked_tiles.items():
             if i[0] == p1.x and i[1] == p1.y:
                 game_over_msg(2)
+                game_over = True
+            if i[0] == p2.x and i[1] == p2.y:
+                game_over_msg(1)
                 game_over = True
 
     ## debugging
@@ -296,11 +226,13 @@ while not game_over:
         else:
             DISPLAY_SURFACE.blit(FONT_DB.render("Food: -", 1, COLOR_DB), (340, DISPLAY_SURFACE.get_height() - 40))
 
+    #add head to marked tiles
+    marked_tiles[(p1.x, p1.y)] =  COLOR_P1
+    marked_tiles[(p2.x, p2.y)] =  COLOR_P2
+
     ## update
     CLOCK.tick(TPS)
     pygame.display.update()
-    
-if args.raspi:
-  GPIO.cleanup()
+
     
 pygame.time.wait(4000)
