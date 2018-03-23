@@ -2,6 +2,7 @@
 ## CSE 150 W18 Extra Credit Report
 
 **Creating and experimenting with multiple AI's performance using a 2-player Snake Battle.**
+
 **Credits: Scriptim's [Snake-Battle](https://github.com/Scriptim/Snake-Battle) for the base game engine**
 
 
