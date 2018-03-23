@@ -1,5 +1,10 @@
 import argparse, pygame, sys, os, random
+from ai import *
 from pygame.locals import *
+
+
+#Run simulations
+auto = True
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
@@ -121,6 +126,9 @@ p2.y = TILES_Y / 2 + 5
 p2.direction = UP
 # p2.tail = [(p2.x, p2.y - 1), (p2.x, p2.y - 2)]
 
+# Create AI objects
+simpleai = Simple_ai(UP, marked_tiles)
+
 ## main loop
 while not game_over:
     ## event queue
@@ -130,6 +138,7 @@ while not game_over:
             print("## Quit ##")
             pygame.quit()
             sys.exit()
+
         ## keyboard mode
         elif event.type == KEYDOWN :
             if event.key == K_a:
@@ -148,9 +157,21 @@ while not game_over:
                 p2.right = True
                 p2.left = False
                 p2.turn()
-                
+    ## run simulation
+    if auto:
+        move = simpleai.computeMove()
+        print (move)
+        if move == 'left': 
+            p1.left = True
+            p1.right = False
+            p1.turn()
+        elif move == 'right':
+            p1.left = False
+            p1.right = True
+            p1.turn()       
 
 
+    #Reset turn values
     p1.left = False
     p1.right = False
     p2.left = False
@@ -175,26 +196,19 @@ while not game_over:
 
     #Increment length every loop
     p1.length += 1
-
-    ## score
-    p1_length_label = FONT_SC.render(str(p1.length), 1, COLOR_P1)
-    sep_length_label = FONT_SC.render(":", 1, COLOR_FG)
-    p2_length_label = FONT_SC.render(str(p2.length), 1, COLOR_P2)
-    DISPLAY_SURFACE.blit(p1_length_label, (DISPLAY_SURFACE.get_width() / 2 - p1_length_label.get_rect().width - TILE_SIZE, 20))
-    DISPLAY_SURFACE.blit(sep_length_label, (DISPLAY_SURFACE.get_width() / 2, 20))
-    DISPLAY_SURFACE.blit(p2_length_label, (DISPLAY_SURFACE.get_width() / 2 + sep_length_label.get_rect().width + TILE_SIZE, 20))
+    p2.length += 1
 
     ## check game over (edges)
-    # if (p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0) and (p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0):
-    #     game_over_msg(0)
-    #     game_over = True
-    # else:
-    #     if p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0:
-    #         game_over_msg(2)
-    #         game_over = True
-    #     elif p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0:
-    #         game_over_msg(1)
-    #         game_over = True
+    if (p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0) and (p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0):
+        game_over_msg(0)
+        game_over = True
+    else:
+        if p1.x >= TILES_X or p1.y >= TILES_Y or p1.x < 0 or p1.y < 0:
+            game_over_msg(2)
+            game_over = True
+        elif p2.x >= TILES_X or p2.y >= TILES_Y or p2.x < 0 or p2.y < 0:
+            game_over_msg(1)
+            game_over = True
 
     ## check game over (touch)
     if p1.x == p2.x and p1.y == p2.y:
