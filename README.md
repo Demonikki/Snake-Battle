@@ -1,17 +1,17 @@
 # Snake Battle - AI
 ## CSE 150 W18 Extra Credit Report
 
-### Creating and experimenting with multiple AI's performance using a 2-player Snake Battle.
-### Credits for the game engine go to user Scriptim's [Snake-Battle](https://github.com/Scriptim/Snake-Battle) Project.
+**Creating and experimenting with multiple AI's performance using a 2-player Snake Battle.**
+**Credits: Scriptim's [Snake-Battle](https://github.com/Scriptim/Snake-Battle) for the base game engine**
 
 
 -----
 
-# Snake Battle 
+## Snake Battle 
 
 Play **Snake** with two players
 
-## Play Game
+### Play Game
 
 - Player 1:
     - Turn left with `A`
@@ -23,7 +23,7 @@ Play **Snake** with two players
 - You lose, when you touch your opponent or the window borders
 - When both players "lose" at once, the longer snake will win
 
-## Arguments
+### Arguments
 
 `$ python2.7 snakebattle.py --help`
 
