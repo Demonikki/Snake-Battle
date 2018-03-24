@@ -21,6 +21,8 @@ COLOR_P2 = (30, 255, 30) # player 2
 
 # Could probably benefit from inheritance but keeping it open to flexibility
 
+''' Simple AI that only moves diagonally
+'''
 class Simple_ai:
     def __init__(self, direction, marked_tiles, currHead, oppHead):
         self.toggle = True
@@ -38,6 +40,23 @@ class Simple_ai:
         # print(self.toggle)
         self.toggle = not self.toggle
         if (self.toggle): return 'left'
+        else: return 'right'
+
+
+''' Purely Random Player
+    Returns 'left' or 'right' decision randomly
+'''
+class Random_ai:
+    def __init__(self, direction, marked_tiles, currHead, oppHead):
+        self.direction = direction 
+        self.marked = marked_tiles
+        self.choice = UP
+        self.head = currHead
+        self.oppHead = oppHead
+    
+    def computeMove(self, marked_tiles, currHead, oppHead, direction):
+        result = random.randint(0,2)
+        if (result == 0): return 'left'
         else: return 'right'
 
 
@@ -126,6 +145,8 @@ class Original_ai:
         return total
 
     def moveHead(self, head, move):
+        if (not head): 
+            return None
         newHead = (head[0]+move[0], head[1]+move[1])
         if (newHead[0] < 0 or newHead[1] < 0 or newHead[0] >= SIZE or newHead[1] >= SIZE):
             return None
@@ -147,9 +168,7 @@ class Original_ai:
         for move in MOVES:
             if(move != oppDir(direction)):
                 #Update board with 1 square added
-                print(head)
                 head = self.moveHead(head, move)
-                print(head, "***\n")
                 if (not head): continue
                 #Compute score for this board
                 score = self.getScore(board, head)
@@ -160,7 +179,6 @@ class Original_ai:
                     max_score_dir = move
                     curr_score = score
 
-        print (max_score_dir)
         return self.processMove(max_score_dir, direction)
 
     def processMove(self, moveDir, direction):
@@ -199,14 +217,7 @@ class Original_ai:
             if moveDir == LEFT:
                 return ''
             if moveDir == RIGHT:
-                return ''
-        
-        
-
-        
-
-
-
+                return ''  
 
 
 
