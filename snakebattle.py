@@ -1,6 +1,7 @@
 import argparse, pygame, sys, os, random
-from ai import *
 from pygame.locals import *
+from ai import *
+
 
 
 #Run simulations
@@ -9,12 +10,12 @@ draw = False
 
 
 
-def_fps = 12 #10000000
+def_fps = 10000000
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument('-s', '--tilesize', dest='tilesize', metavar='PX', help='the size of a tile', type=int, default=12)
-arg_parser.add_argument('-t', '--tiles', dest='tiles', nargs=2, metavar=('X', 'Y'), help='the number of tiles', type=int, default=[70, 50])
+arg_parser.add_argument('-t', '--tiles', dest='tiles', nargs=2, metavar=('X', 'Y'), help='the number of tiles', type=int, default=[70, 70])
 arg_parser.add_argument('-d', '--debug', dest='debug', action='store_true', help='show debug information on the screen')
 arg_parser.add_argument('-f', '--fps', dest='fps', nargs=1, metavar='TPS', help='framerate in ticks per second', type=int, default=def_fps)
 arg_parser.add_argument('-b', '--delay', dest='delay', metavar='MS', help='button delay (raspi mode)', type=int, default=100)
@@ -73,9 +74,6 @@ def game_over_msg(winner):
     with open("results.txt", "a") as myfile:
         myfile.write(str(winner))
 
-
-
-
 ## players
 class Player:
     x = None
@@ -108,13 +106,13 @@ class Player:
 
 game_over = False
 p1 = Player()
-p1.x = random.randint(0,TILES_X)
-p1.y = random.randint(0,TILES_Y)
+p1.x = random.randint(1,69)
+p1.y = random.randint(1,69)
 p1.direction = UP
 
 p2 = Player()
-p2.x = random.randint(0,TILES_X)
-p2.y = random.randint(0,TILES_Y)
+p2.x = random.randint(1,69)
+p2.y = random.randint(1,69)
 while (p2.x == p1.x and p2.y == p1.y):
     p2.x = random.randint(0,TILES_X)
     p2.y = random.randint(0,TILES_Y)
@@ -124,7 +122,9 @@ p2.direction = UP
 ## Define which AI for which player
 # Create AI objects
 player1_ai = Simple_ai(UP, marked_tiles, (p1.x,p1.y), (p2.x,p2.y))
-player2_ai = Simple_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
+player2_ai = Original_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
+#player2_ai = Adverse_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
+
 
 
 ## main loop
@@ -157,7 +157,7 @@ while not game_over:
                 p2.turn()
     ## run simulation
     if auto:
-        move1 = player1_ai.computeMove()
+        move1 = player1_ai.computeMove(marked_tiles, (p1.x,p1.y), (p2.x,p2.y), p1.direction)
         if move1 == 'left': 
             p1.left = True
             p1.right = False
@@ -166,7 +166,7 @@ while not game_over:
             p1.left = False
             p1.right = True
             p1.turn() 
-        move2 = player2_ai.computeMove()
+        move2 = player2_ai.computeMove(marked_tiles, (p2.x,p1.y), (p1.x,p1.y), p2.direction)
         if move2 == 'left': 
             p2.left = True
             p2.right = False
@@ -238,4 +238,4 @@ while not game_over:
     pygame.display.update()
 
 
-pygame.time.wait(40)
+pygame.time.wait(0)
