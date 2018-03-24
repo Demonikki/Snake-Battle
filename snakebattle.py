@@ -10,7 +10,7 @@ draw = False
 
 
 
-def_fps = 10000000
+def_fps = 10#00000
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
@@ -121,8 +121,8 @@ p2.direction = UP
 
 ## Define which AI for which player
 # Create AI objects
-player1_ai = Simple_ai(UP, marked_tiles, (p1.x,p1.y), (p2.x,p2.y))
-player2_ai = Original_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
+player1_ai = Adverse_ai(UP, marked_tiles, (p1.x,p1.y), (p2.x,p2.y))
+player2_ai = Simple_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
 #player2_ai = Adverse_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
 
 
@@ -157,7 +157,7 @@ while not game_over:
                 p2.turn()
     ## run simulation
     if auto:
-        move1 = player1_ai.computeMove(marked_tiles, (p1.x,p1.y), (p2.x,p2.y), p1.direction)
+        move1 = player1_ai.computeMove(marked_tiles, (p1.x,p1.y), (p2.x,p2.y), p1.direction, p2.direction)
         if move1 == 'left': 
             p1.left = True
             p1.right = False
@@ -166,7 +166,7 @@ while not game_over:
             p1.left = False
             p1.right = True
             p1.turn() 
-        move2 = player2_ai.computeMove(marked_tiles, (p2.x,p1.y), (p1.x,p1.y), p2.direction)
+        move2 = player2_ai.computeMove(marked_tiles, (p2.x,p1.y), (p1.x,p1.y), p2.direction, p1.direction)
         if move2 == 'left': 
             p2.left = True
             p2.right = False
