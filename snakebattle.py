@@ -10,7 +10,7 @@ draw = False
 
 
 
-def_fps = 10#00000
+def_fps = 10000000
 
 ## start arguments
 arg_parser = argparse.ArgumentParser()
@@ -122,7 +122,7 @@ p2.direction = UP
 ## Define which AI for which player
 # Create AI objects
 player1_ai = Adverse_ai(UP, marked_tiles, (p1.x,p1.y), (p2.x,p2.y))
-player2_ai = Simple_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
+player2_ai = Original_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
 #player2_ai = Adverse_ai(UP, marked_tiles, (p2.x,p2.y), (p1.x,p1.y))
 
 

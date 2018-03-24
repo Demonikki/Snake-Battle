@@ -1,7 +1,7 @@
 #Run the file 100 times
 import time
 start = time.time()
-numSim = 100
+numSim = 1000
 open('results.txt', 'w').close()
 for i in range(numSim):
   execfile("snakebattle.py")

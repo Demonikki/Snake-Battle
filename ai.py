@@ -276,6 +276,8 @@ class Adverse_ai:
         self.head = currHead
         self.oppHead = oppHead
 
+        playerScores = []
+        oppScores = []
         board = [[]]
         head = self.head
         score = 0
@@ -298,8 +300,25 @@ class Adverse_ai:
                         #Update board with 1 move from Opponent's Head
                         oppHead = self.moveHead(oppHead, oppMove)
                         if (not oppHead): continue
-                        oppScores.append(self.getScore(board, oppHead))
+                        oppScore = self.getScore(board, oppHead)/100
+                        
+                        #Check 4 possible moves of the player and get the max score
+                        playerScores = []
+                        for playerMove in MOVES:
+                            head2 = head
+                            if(playerMove != oppDir(move)):
+                                head2 = self.moveHead(head2, playerMove)
+                                if (not head2): continue
+                                #Compute score for this board
+                                playerScore = self.getScore(board, head2)/100
+                                playerScores.append(playerScore)
+
+                        oppScores.append(oppScore)
+                # print (score)
                 if (oppScores): score += min(oppScores)
+                # print (score)
+                if (playerScores) : score += max(playerScores)
+                # print (score)
                 if (score >= max_score):
                     max_score = score
                     max_score_dir = move
