@@ -19,7 +19,7 @@ This version of Snake has been modified so that
 * There are 2 snakes on the board instead of one
 * Each snake grows by length 1 each turn, and the tail end is fixed
 
-**Rules**
+### Rules
 
 The goal of the game is to survive for as long as possible without dying. A snake can die by bumping into the boundaries, the other snake, or itself. If one snake dies, the other snake is automatically the winner. If both snakes’ heads bump into each other, the game ends in a Draw. Snakes start at a random location somewhere on the board, and start by facing upward.
 
